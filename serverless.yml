@@ -15,7 +15,10 @@ service: audemos # NOTE: update this with your service name
 
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
-# frameworkVersion: "=X.X.X"
+frameworkVersion: ">=1.1.0"
+
+custom:
+  bucket: audemo-bucket
 
 provider:
   name: aws
@@ -33,8 +36,7 @@ provider:
       Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
     - Effect: "Allow"
       Action:
-        - "s3:PutObject"
-        - "s3:GetObject"
+        - "s3:*"
       Resource:
         Fn::Join:
           - ""
@@ -56,8 +58,15 @@ provider:
 #    - exclude-me-dir/**
 
 functions:
-  hello:
-    handler: handler.hello
+  postprocess:
+    handler: handler.postprocess
+    events:
+      - s3:
+        bucket: ${self:custom.bucket}
+        event: s3:ObjectCreated:*
+        rules:
+          - suffix: .wav
+          - suffix: .mp3
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
@@ -98,8 +107,8 @@ resources:
     NewResource:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: audemo-bucket
+        BucketName: audemos-bucket
   Outputs:
      NewOutput:
-       Description: "Audemo output"
+       Description: "Audemos output"
        Value: "Some output value"
