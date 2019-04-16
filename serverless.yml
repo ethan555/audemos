@@ -24,6 +24,9 @@ provider:
   name: aws
   runtime: nodejs8.10
 
+  environment:
+    S3_AUDIO_BUCKET: ${self:service}-${self.provider.stage}-demos
+
 # you can overwrite defaults here
   stage: dev
   region: us-east-1
@@ -32,21 +35,10 @@ provider:
   iamRoleStatements:
     - Effect: "Allow"
       Action:
-        - "s3:ListBucket"
-      Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
-    - Effect: "Allow"
-      Action:
-        - "s3:*"
+        - "s3:PutObject"
+        - "s3:GetObject"
       Resource:
-        Fn::Join:
-          - ""
-          - - "arn:aws:s3:::"
-            - "Ref" : "ServerlessDeploymentBucket"
-            - "/*"
-
-# you can define service wide environment variables here
-#  environment:
-#    variable1: value1
+        - "arn:aws:s3:::${self:provider.environment.S3_AUDIO_BUCKET}/*"
 
 # you can add packaging information here
 #package:
@@ -65,7 +57,6 @@ functions:
         bucket: ${self:custom.bucket}
         event: s3:ObjectCreated:*
         rules:
-          - suffix: .wav
           - suffix: .mp3
 
 #    The following are a few example events you can configure
@@ -107,8 +98,4 @@ resources:
     NewResource:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: audemos-bucket
-  Outputs:
-     NewOutput:
-       Description: "Audemos output"
-       Value: "Some output value"
+        BucketName: ${self:provider.environment.S3_AUDIO_BUCKET}
