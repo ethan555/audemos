@@ -2,6 +2,14 @@
 
 var AWS = require('aws-sdk');
 
+module.exports.getURL = (event, context, callback) => {
+  var s3 = new AWS.s3();
+  var s3Params = {
+    Bucket: '${S3_AUDIO_BUCKET}',
+    Key: 
+  };
+}
+
 // module.exports.hello = async (event, context) => {
 //   return {
 //     statusCode: 200,
