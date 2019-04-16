@@ -1,5 +1,7 @@
 'use strict';
 
+var AWS = require('aws-sdk');
+
 // module.exports.hello = async (event, context) => {
 //   return {
 //     statusCode: 200,

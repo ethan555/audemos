@@ -17,15 +17,13 @@ service: audemos # NOTE: update this with your service name
 # Check out our docs for more details
 frameworkVersion: ">=1.1.0"
 
-custom:
-  bucket: audemo-bucket
-
 provider:
   name: aws
   runtime: nodejs8.10
 
   environment:
     S3_AUDIO_BUCKET: ${self:service}-${self.provider.stage}-demos
+# audemos-dev-demos
 
 # you can overwrite defaults here
   stage: dev
