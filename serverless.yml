@@ -48,14 +48,21 @@ provider:
 #    - exclude-me-dir/**
 
 functions:
-  postprocess:
-    handler: handler.postprocess
+  getURL:
+    handler: handler.getURL
     events:
-      - s3:
-        bucket: ${self:custom.bucket}
-        event: s3:ObjectCreated:*
-        rules:
-          - suffix: .mp3
+      - http:
+        path: requestUploadURL
+        method: post
+        cors: true
+  # postprocess:
+  #   handler: handler.postprocess
+  #   events:
+  #     - s3:
+  #       bucket: ${self:custom.bucket}
+  #       event: s3:ObjectCreated:*
+  #       rules:
+  #         - suffix: .mp3
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
