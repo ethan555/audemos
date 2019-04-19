@@ -12,6 +12,7 @@
 # Happy Coding!
 
 service: audemos # NOTE: update this with your service name
+#app: AUDEMOS
 
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
@@ -22,7 +23,7 @@ provider:
   runtime: nodejs8.10
 
   environment:
-    S3_AUDIO_BUCKET: ${self:service}-${self.provider.stage}-demos
+    S3_AUDIO_BUCKET: ${self:service}-${self:provider.stage}-demos
 # audemos-dev-demos
 
 # you can overwrite defaults here
@@ -33,8 +34,7 @@ provider:
   iamRoleStatements:
     - Effect: "Allow"
       Action:
-        - "s3:PutObject"
-        - "s3:GetObject"
+        - "s3:*"
       Resource:
         - "arn:aws:s3:::${self:provider.environment.S3_AUDIO_BUCKET}/*"
 
@@ -52,9 +52,9 @@ functions:
     handler: handler.getURL
     events:
       - http:
-        path: requestUploadURL
-        method: post
-        cors: true
+          path: getURL
+          method: post
+          cors: true
   # postprocess:
   #   handler: handler.postprocess
   #   events:
@@ -104,3 +104,19 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: ${self:provider.environment.S3_AUDIO_BUCKET}
+        AccessControl: PublicRead
+        CorsConfiguration:
+          CorsRules:
+            - AllowedMethods:
+              - GET
+              - PUT
+              - POST
+              - HEAD
+              AllowedOrigins:
+              - "*"
+              AllowedHeaders:
+              - "*"
+        LifecycleConfiguration:
+          Rules:
+            - Status: "Enabled"
+              ExpirationInDays: 3

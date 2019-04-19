@@ -2,10 +2,32 @@
   <head>
     <title>Upload to S3</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <style>
+      body {
+        font-family: 'Verdana', Verdana, sans-serif;
+      }
+      .aligner {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+      }
+      #drop {
+        height: 300px;
+        width: 300px;
+        border-radius: 300px;
+        color: #000c93;
+        background-color: #baf;
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+      }
+    </style>
   </head>
 
   <body>
-    <form action="%S3_URL%" method="post" enctype="multipart/form-data">
+    <!-- <form action="%S3_URL%" method="post" enctype="multipart/form-data">
       Key to upload:
       <input type="input"  name="key" value="${filename}" /><br />
       <input type="hidden" name="AWSAccessKeyId" value="%AWS_ACCESS_KEY%">
@@ -19,14 +41,81 @@
       <input type="hidden" name="Policy" value='%POLICY_BASE64' />
       <input type="hidden" name="X-Amz-Signature" value="%SIGNATURE%" />
       File:
-      <input type="file"   name="file" /> <br />
+      <input type="file"   name="file" /> <br /> -->
       <!-- The elements after this will be ignored -->
-      <input type="submit" name="submit" value="Upload to Amazon S3" />
-    </form>
-    <form>
-      <input type
-    </form>
+      <!-- <input type="submit" name="submit" value="Upload to Amazon S3" />
+    </form> -->
+    <div class="aligner">
+      <div id="drop">Drop mp3 file here.</div>
+      <div id="list">
+        <h1>Uploaded Files:</h1>
+      </div>
+    <div>
+
     <script type="text/javascript">
+      var apiBaseURL = "https://tdyubs8tnh.execute-api.us-east-1.amazonaws.com/dev"
+      var drop = document.getElementById('drop');
+      var list = document.getElementById('list');
+
+      // Generate randomized string for the object key
+      function randomString() {
+        var random_string = "";
+        var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        for (var i = 0; i < 32; i ++) {
+          random_string += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return random_string;
+      }
+
+      function cancel(e) {
+        e.preventDefault();
+        return false;
+      }
+
+      function handleDrop(e) {
+        e.preventDefault();
+        var dt    = e.dataTransfer;
+        var files = dt.files;
+        for (var i=0; i<files.length; i++) {
+          var file = files[i];
+          var reader = new FileReader();
+          reader.addEventListener('loadend', function(e) {
+            console.log("We got here");
+            fetch(apiBaseURL+"/getURL", {
+              method: "POST",
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                name: file.name,
+                type: file.type
+              })
+            })
+            .then(function(response) {
+              return response.json();
+            })
+            .then(function(json) {
+              return fetch(json.uploadURL, {
+                method: "PUT",
+                body: new Blob([reader.result], {type: file.type})
+              })
+            })
+            .then(function() {
+              var random_string = randomString();
+              var uploadedFileNode = document.createElement('div');
+              uploadedFileNode.innerHTML = '<a href="//s3.amazonaws.com/audemos-dev-demos/'+ file.name + random_string +'">'+ file.name + random_string +'</a>';
+              list.appendChild(uploadedFileNode);
+            });
+          });
+          reader.readAsArrayBuffer(file);
+        }
+        return false;
+      }
+
+      // Tells the browser that we *can* drop on this target
+      drop.addEventListener('dragenter', cancel);
+      drop.addEventListener('dragover', cancel);
+      drop.addEventListener('drop', handleDrop);
     </script>
   </body>
 </html>

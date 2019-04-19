@@ -22,15 +22,18 @@ module.exports.getURL = (event, context, callback) => {
   };
 
   var uploadURL = s3.getSignedUrl('putObject', s3Parameters);
-
   callback(null, {
-    statusCode: 200,
-    headers: {
-      'Access-Control-Allow-Origin' : 'https://www.audemos.com'
-    },
-    body: JSON.stringify({ uploadURL : uploadURL }),
-  })
-}
+      statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin' : '*',
+        'Access-Control-Allow-Credentials' : true,
+        'Access-Control-Allow-Methods' : 'POST',
+        'Access-Control-Allow-Headers' : 'Content-Type',
+      },
+      body: JSON.stringify({ uploadURL : uploadURL }),
+    }
+  );
+};
 
 // module.exports.hello = async (event, context) => {
 //   return {
