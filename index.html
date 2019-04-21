@@ -68,7 +68,7 @@
         var files = dt.files;
         for (var i=0; i<files.length; i++) {
           var file = files[i];
-          var uploadkey = "";
+          var timestamp = "";
           var reader = new FileReader();
           reader.addEventListener('loadend', function(e) {
             fetch(apiBaseURL+"/getURL", {
@@ -85,15 +85,17 @@
               return response.json();
             })
             .then(function(json) {
-              uploadkey = json.key;
+              timestamp = "" + json.timestamp;
+              console.log(timestamp);
               return fetch(json.uploadURL, {
                 method: "PUT",
-                body: new Blob([reader.result], {key: uploadkey, type: file.type})
+                body: new Blob([reader.result], {key: json.key, type: file.type})
               })
             })
             .then(function() {
               var uploadedFileNode = document.createElement('div');
-              uploadedFileNode.innerHTML = '<a href="//s3.amazonaws.com/audemos-dev-demos/'+ uploadkey +'">'+ uploadkey +'</a>';
+              var url = window.location.origin + window.location.pathname;
+              uploadedFileNode.innerHTML = '<a href="'+ url + timestamp +'">'+ timestamp +'</a>';
               list.appendChild(uploadedFileNode);
             });
           });

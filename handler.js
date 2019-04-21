@@ -7,8 +7,8 @@ module.exports.getURL = (event, context, callback) => {
   var parameters = JSON.parse(event.body);
 
   // Get the timestamp
-  var timestamp = Date.now();
-  var key = "" + timestamp + parameters.name;
+  var timestamp = "" + Date.now();
+  var key = timestamp + parameters.name;
 
   // What bucket to send to
   var s3Parameters = {
@@ -29,6 +29,7 @@ module.exports.getURL = (event, context, callback) => {
       },
       body: JSON.stringify({
         key : key,
+        timestamp : timestamp,
         uploadURL : uploadURL
       }),
     }
