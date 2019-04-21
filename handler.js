@@ -3,7 +3,7 @@
 var AWS = require('aws-sdk');
 
 module.exports.getURL = (event, context, callback) => {
-  var s3 = new AWS.s3();
+  var s3 = new AWS.S3();
   var parameters = JSON.parse(event.body);
 
   // Generate randomized string for the object key
@@ -14,7 +14,7 @@ module.exports.getURL = (event, context, callback) => {
   // }
 
   // What bucket to send to
-  var s3Parameterss = {
+  var s3Parameters = {
     Bucket: '${S3_AUDIO_BUCKET}',
     Key: parameters.name,
     ContentType: parameters.type,
