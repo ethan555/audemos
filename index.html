@@ -57,16 +57,6 @@
       var drop = document.getElementById('drop');
       var list = document.getElementById('list');
 
-      // Generate randomized string for the object key
-      function randomString() {
-        var random_string = "";
-        var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        for (var i = 0; i < 32; i ++) {
-          random_string += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return random_string;
-      }
-
       function cancel(e) {
         e.preventDefault();
         return false;
@@ -78,9 +68,9 @@
         var files = dt.files;
         for (var i=0; i<files.length; i++) {
           var file = files[i];
+          var uploadkey = "";
           var reader = new FileReader();
           reader.addEventListener('loadend', function(e) {
-            console.log("We got here");
             fetch(apiBaseURL+"/getURL", {
               method: "POST",
               headers: {
@@ -95,15 +85,15 @@
               return response.json();
             })
             .then(function(json) {
+              uploadkey = json.key;
               return fetch(json.uploadURL, {
                 method: "PUT",
-                body: new Blob([reader.result], {type: file.type})
+                body: new Blob([reader.result], {key: uploadkey, type: file.type})
               })
             })
             .then(function() {
-              var random_string = randomString();
               var uploadedFileNode = document.createElement('div');
-              uploadedFileNode.innerHTML = '<a href="//s3.amazonaws.com/audemos-dev-demos/'+ file.name + random_string +'">'+ file.name + random_string +'</a>';
+              uploadedFileNode.innerHTML = '<a href="//s3.amazonaws.com/audemos-dev-demos/'+ uploadkey +'">'+ uploadkey +'</a>';
               list.appendChild(uploadedFileNode);
             });
           });
