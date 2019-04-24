@@ -5,6 +5,7 @@ var AWS = require('aws-sdk');
 module.exports.getURL = (event, context, callback) => {
   var s3 = new AWS.S3();
   var parameters = JSON.parse(event.body);
+  var AccessKey = document.getElementsByName("AccessKey")[0].value;
 
   // Get the timestamp
   var timestamp = "" + Date.now();

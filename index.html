@@ -52,6 +52,8 @@
       </div>
     <div>
 
+
+
     <script type="text/javascript">
       var apiBaseURL = "https://tdyubs8tnh.execute-api.us-east-1.amazonaws.com/dev"
       var drop = document.getElementById('drop');
@@ -104,10 +106,30 @@
         return false;
       }
 
+      // <audio controls preload="metadata" style=" width:300px;">
+      //   <source src="" type="audio/mpeg">
+      //   Your browser does not support the audio element.
+      // </audio><br />
+      // // <audio controls="controls">
+      // //   <source src="" type="audio/mpeg" >
+      // // </audio><br />
+
       // Tells the browser that we *can* drop on this target
       drop.addEventListener('dragenter', cancel);
       drop.addEventListener('dragover', cancel);
       drop.addEventListener('drop', handleDrop);
     </script>
+
+    <audio controls>
+      <source src="" type="audio/mp3">
+    </audio>
+    <form>
+      Enter Access key:<br>
+      <input type="text" name="AccessKey"><br>
+      <input type="submit" value="Submit">
+    </form>
+
+
+
   </body>
 </html>
