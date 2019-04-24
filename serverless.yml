@@ -55,6 +55,13 @@ functions:
           path: getURL
           method: post
           cors: true
+  getFileURL:
+    handler: handler.getFileURL
+    events:
+      - http:
+          path: getFileURL
+          method: post
+          cors: true
   # postprocess:
   #   handler: handler.postprocess
   #   events:
