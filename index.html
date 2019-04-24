@@ -66,11 +66,19 @@
       var drop = document.getElementById('drop');
       var list = document.getElementById('list');
       // var submit = document.getElementById('submit');
-      var accessKey = document.getElementById('AccessKey');
+      var accessKey = getURLVars()["AccessKey"];
 
       function cancel(e) {
         e.preventDefault();
         return false;
+      }
+
+      function getURLVars() {
+        var vars = {};
+        var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+            vars[key] = value;
+        });
+        return vars;
       }
 
       function handleDrop(e) {
@@ -125,14 +133,15 @@
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            key: accessKey,
+            prefix: accessKey,
           })
         })
         .then(function(response) {
           return response.json();
         })
         .then(function(json) {
-          document.getElementById('audioURL').src = json.url;
+          if (json.url != "undefined")
+            document.getElementById('audioURL').src = json.url;
         });
       }
 

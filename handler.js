@@ -55,9 +55,25 @@ module.exports.getFileURL = (event, context, callback) => {
   s3.listObjectsV2(s3Parameters, function(err, data) {
     if (err) console.log(err, err.stack); // error ocurred
     else {
+      console.log("We got em");
       if (data.Contents.length > 0) {
+        console.log("We found a thing");
         //url += data.Contents[0].Key;  // append to the prefix to get the link
-        key = data.Contents[0].key;
+        key = data.Contents[0].Key;
+      } else {
+        callback(null, {
+            statusCode: 500,
+            headers: {
+              'Access-Control-Allow-Origin' : '*',
+              'Access-Control-Allow-Credentials' : true,
+              'Access-Control-Allow-Methods' : 'POST',
+              'Access-Control-Allow-Headers' : 'Content-Type',
+            },
+            body: JSON.stringify({
+              url : "undefined",
+            }),
+          }
+        );
       }
     }
   });
