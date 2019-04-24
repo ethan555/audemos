@@ -52,12 +52,21 @@
       </div>
     <div>
 
-
+    <audio controls>
+      <source id='audioURL' type="audio/mp3" src=""></source>
+    </audio>
+    <form name="audioForm">
+      Enter Access key:<br>
+      <input type="text" name="AccessKey"><br>
+      <input type="submit" value="Submit">
+    </form>
 
     <script type="text/javascript">
       var apiBaseURL = "https://tdyubs8tnh.execute-api.us-east-1.amazonaws.com/dev"
       var drop = document.getElementById('drop');
       var list = document.getElementById('list');
+      // var submit = document.getElementById('submit');
+      var accessKey = document.getElementById('AccessKey');
 
       function cancel(e) {
         e.preventDefault();
@@ -106,6 +115,27 @@
         return false;
       }
 
+      function handleKey() {
+        //e.preventDefault();
+        console.log("NO");
+        
+        fetch(apiBaseURL+"/getFileURL", {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            key: accessKey,
+          })
+        })
+        .then(function(response) {
+          return response.json();
+        })
+        .then(function(json) {
+          document.getElementById('audioURL').src = json.url;
+        });
+      }
+
       // <audio controls preload="metadata" style=" width:300px;">
       //   <source src="" type="audio/mpeg">
       //   Your browser does not support the audio element.
@@ -118,18 +148,13 @@
       drop.addEventListener('dragenter', cancel);
       drop.addEventListener('dragover', cancel);
       drop.addEventListener('drop', handleDrop);
+
+      console.log(accessKey);
+      if (accessKey != null) {
+        console.log("CMON");
+        handleKey();
+      }
     </script>
-
-    <audio controls>
-      <source src="" type="audio/mp3">
-    </audio>
-    <form>
-      Enter Access key:<br>
-      <input type="text" name="AccessKey"><br>
-      <input type="submit" value="Submit">
-    </form>
-
-
 
   </body>
 </html>
