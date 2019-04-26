@@ -6,9 +6,10 @@ module.exports.getURL = (event, context, callback) => {
   var s3 = new AWS.S3();
   var parameters = JSON.parse(event.body);
 
+  var parsed = parameters.name.split(" ").join("");
   // Get the timestamp
   var timestamp = "" + Date.now();
-  var key = timestamp + "_" + parameters.name;
+  var key = timestamp + "_" + parsed;
 
   // What bucket to send to
   var s3Parameters = {
