@@ -88,6 +88,7 @@
         for (var i=0; i<files.length; i++) {
           var file = files[i];
           var timestamp = "";
+          var key = file.name;
           var reader = new FileReader();
           reader.addEventListener('loadend', function(e) {
             fetch(apiBaseURL+"/getURL", {
@@ -105,6 +106,7 @@
             })
             .then(function(json) {
               timestamp = "" + json.timestamp;
+              key = timestamp + "_" + key;
               console.log(timestamp);
               return fetch(json.uploadURL, {
                 method: "PUT",
@@ -114,7 +116,7 @@
             .then(function() {
               var uploadedFileNode = document.createElement('div');
               var url = window.location.origin + window.location.pathname;
-              uploadedFileNode.innerHTML = '<a href="'+ url + timestamp +'">'+ timestamp +'</a>';
+              uploadedFileNode.innerHTML = '<a href="'+ url + key +'">'+ key +'</a>';
               list.appendChild(uploadedFileNode);
             });
           });
