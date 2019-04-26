@@ -42,17 +42,17 @@ module.exports.getFileURL = (event, context, callback) => {
 
   // Construct the s3 bucket's url to download from
   var url = "https://s3.amazonaws.com/" + process.env.S3_AUDIO_BUCKET;
-  var key = "";
+  var key = parameters.key;
 
   // We only want files from this bucket with the prefix we want
-  var s3Parameters = {
+  /*var s3Parameters = {
     Bucket: process.env.S3_AUDIO_BUCKET,
     Prefix: parameters.prefix + "_",
   };
-  console.log(s3Parameters.Prefix);
+  console.log(s3Parameters.Prefix);*/
 
   // Get the list of objects using our filters
-  s3.listObjectsV2(s3Parameters, function(err, data) {
+  /*s3.listObjectsV2(s3Parameters, function(err, data) {
     if (err) console.log(err, err.stack); // error ocurred
     else {
       console.log("We got em");
@@ -77,7 +77,7 @@ module.exports.getFileURL = (event, context, callback) => {
       }
     }
   });
-  console.log(key);
+  console.log(key);*/
 
   // url = s3.getObject
   url = s3.getSignedUrl('getObject', {
