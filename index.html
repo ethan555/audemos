@@ -51,7 +51,6 @@
       var apiBaseURL = "https://tdyubs8tnh.execute-api.us-east-1.amazonaws.com/dev"
       var drop = document.getElementById('drop');
       var list = document.getElementById('list');
-      // var submit = document.getElementById('submit');
       var accessKey = getURLVars()["AccessKey"];
 
       function cancel(e) {
@@ -59,6 +58,7 @@
         return false;
       }
 
+      // Get the variables stored in our URL.
       function getURLVars() {
         var vars = {};
         var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
@@ -67,6 +67,7 @@
         return vars;
       }
 
+      // Handle when the user drops a file into the dropzone
       function handleDrop(e) {
         e.preventDefault();
         var dt    = e.dataTransfer;
@@ -111,6 +112,7 @@
         return false;
       }
 
+      // Handle when the user enters a key into the form
       function handleKey() {
         
         // fetch(apiBaseURL+"/getFileURL", {
@@ -132,15 +134,12 @@
         var url = "https://s3.amazonaws.com/audemos-dev-demos/" + accessKey;
         document.getElementById('audioURL').src = url;
         document.getElementById('audioFile').href = url;
-      }
 
-      // <audio controls preload="metadata" style=" width:300px;">
-      //   <source src="" type="audio/mpeg">
-      //   Your browser does not support the audio element.
-      // </audio><br />
-      // // <audio controls="controls">
-      // //   <source src="" type="audio/mpeg" >
-      // // </audio><br />
+        var uploadedFileNode = document.createElement('div');
+        url = window.location.origin + window.location.pathname;
+        uploadedFileNode.innerHTML = '<a href="'+ url + "?AccessKey=" + key +'">'+ key +'</a>';
+        list.appendChild(uploadedFileNode);
+      }
 
       // Tells the browser that we *can* drop on this target
       drop.addEventListener('dragenter', cancel);
