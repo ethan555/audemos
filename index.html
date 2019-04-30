@@ -38,6 +38,7 @@
       <b>Loaded file:</b> <p id='audioFile'></p>
       <audio controls>
         <source id='audioURL' type="audio/mp3" src=""></source>
+        Your browser does not support this audio player.
       </audio>
       <form name="audioForm">
         <b>Enter Access Key:</b><br>
@@ -124,33 +125,43 @@
 
       // Handle when the user enters a key into the form
       function handleKey() {
-        
-        // fetch(apiBaseURL+"/getFileURL", {
-        //   method: "POST",
-        //   headers: {
-        //     'Content-Type': 'application/json',
-        //   },
-        //   body: JSON.stringify({
-        //     key: accessKey,
-        //   })
-        // })
-        // .then(function(response) {
-        //   return response.json();
-        // })
-        // .then(function(json) {
-        //   if (json.url != "undefined")
-        //     document.getElementById('audioURL').src = json.url;
-        // });
-        var url = "https://s3.amazonaws.com/audemos-dev-demos/" + accessKey;
-        document.getElementById('audioURL').src = url;
-        document.getElementById('audioFile').innerHTML = url.split("_", 2)[1];
+        var url = "";
 
-        var audioNode = document.createElement('div');
-        url = window.location.origin + window.location.pathname + "?AccessKey=" + accessKey;
-        audioNode.innerHTML = '<a href="'+ url + '">'+ accessKey +'</a>';
-        var valArray = [url, accessKey];
-        audioNode.value = valArray;
-        list.appendChild(audioNode);
+        fetch(apiBaseURL+"/getFileURL", {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            key: accessKey,
+          })
+        })
+        .then(function(response) {
+          return response.json();
+        })
+        .then(function(json) {
+          if (json.url === "not_found") {
+            // The file was not found, say so
+            console.log("File not found");
+            document.getElementById('audioFile').innerHTML = "Not Found";
+          } else {
+            // The file was found, update the elements to the new URL
+            url = json.url;
+            console.log(url);
+            // url = "https://s3.amazonaws.com/audemos-dev-demos/" + accessKey;
+            // console.log(url);
+
+            document.getElementById('audioURL').src = url;
+            document.getElementById('audioFile').innerHTML = accessKey.split("_", 2)[1];
+
+            var audioNode = document.createElement('div');
+            url = window.location.origin + window.location.pathname + "?AccessKey=" + accessKey;
+            audioNode.innerHTML = '<a href="'+ url + '">'+ accessKey +'</a>';
+            var valArray = [url, accessKey];
+            audioNode.value = valArray;
+            list.appendChild(audioNode);
+          }
+        });
       }
 
       // Copy the latest uploaded url
