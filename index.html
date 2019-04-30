@@ -29,7 +29,7 @@
   <body>
 
     <div class="aligner">
-      Loaded file: <a id='audioFile' href=""></a><br>
+      Loaded file: <p id='audioFile'></p>
       <audio controls>
         <source id='audioURL' type="audio/mp3" src=""></source>
       </audio>
@@ -40,6 +40,8 @@
       </form>
 
       <div id="drop">Drop mp3 file here.</div>
+      <button onclick="copyURL()">Copy Latest URL</button>
+      <button onclick="copyKey()">Copy Latest Key</button>
       <div id="list">
         <h1>Access Keys:</h1>
       </div>
@@ -101,10 +103,12 @@
               })
             })
             .then(function() {
-              var uploadedFileNode = document.createElement('div');
-              var url = window.location.origin + window.location.pathname;
-              uploadedFileNode.innerHTML = '<a href="'+ url + "?AccessKey=" + key +'">'+ key +'</a>';
-              list.appendChild(uploadedFileNode);
+              var audioNode = document.createElement('div');
+              var url = window.location.origin + window.location.pathname + "?AccessKey=" + key;
+              audioNode.innerHTML = '<a href="'+ url +'">'+ key +'</a>';
+              var valArray = [url, key];
+              audioNode.value = valArray;
+              list.appendChild(audioNode);
             });
           });
           reader.readAsArrayBuffer(file);
@@ -133,12 +137,40 @@
         // });
         var url = "https://s3.amazonaws.com/audemos-dev-demos/" + accessKey;
         document.getElementById('audioURL').src = url;
-        document.getElementById('audioFile').href = url;
+        document.getElementById('audioFile').innerHTML = url.split("_", 2)[1];
 
-        var uploadedFileNode = document.createElement('div');
-        url = window.location.origin + window.location.pathname;
-        uploadedFileNode.innerHTML = '<a href="'+ url + "?AccessKey=" + key +'">'+ key +'</a>';
-        list.appendChild(uploadedFileNode);
+        var audioNode = document.createElement('div');
+        url = window.location.origin + window.location.pathname + "?AccessKey=" + accessKey;
+        audioNode.innerHTML = '<a href="'+ url + '">'+ accessKey +'</a>';
+        var valArray = [url, accessKey];
+        audioNode.value = valArray;
+        list.appendChild(audioNode);
+      }
+
+      // Copy the latest uploaded url
+      function copyURL() {
+        if (list.childElementCount > 1) {
+          var text = list.children[1].value[0];
+          console.log(text);
+          navigator.clipboard.writeText(text).then(function() {
+            console.log('Async: Successfully copied URL');
+          }, function(err) {
+            console.error('Async: Could not copy URL');
+          });
+        }
+      }
+
+      // Copy the latest uploaded key
+      function copyKey() {
+        if (list.childElementCount > 1) {
+          var text = list.children[1].value[1];
+          console.log(text);
+          navigator.clipboard.writeText(text).then(function() {
+            console.log('Async: Successfully copied URL');
+          }, function(err) {
+            console.error('Async: Could not copy URL');
+          });
+        }
       }
 
       // Tells the browser that we *can* drop on this target
