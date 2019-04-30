@@ -36,7 +36,7 @@
 
     <div class="aligner">
       <b>Loaded file:</b> <p id='audioFile'></p>
-      <audio controls>
+      <audio id="audio" controls>
         <source id='audioURL' type="audio/mp3" src=""></source>
         Your browser does not support this audio player.
       </audio>
@@ -147,11 +147,13 @@
           } else {
             // The file was found, update the elements to the new URL
             url = json.url;
-            console.log(url);
+            // console.log(url);
             // url = "https://s3.amazonaws.com/audemos-dev-demos/" + accessKey;
             // console.log(url);
 
             document.getElementById('audioURL').src = url;
+            document.getElementById('audioURL').setAttribute('src',url);
+            // console.log(document.getElementById('audioURL').src);
             document.getElementById('audioFile').innerHTML = accessKey.split("_", 2)[1];
 
             var audioNode = document.createElement('div');
@@ -160,6 +162,8 @@
             var valArray = [url, accessKey];
             audioNode.value = valArray;
             list.appendChild(audioNode);
+            document.getElementById('audio').load();
+            // document.getElementById('audio').play();
           }
         });
       }
