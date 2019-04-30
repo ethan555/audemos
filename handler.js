@@ -42,73 +42,50 @@ module.exports.getFileURL = (event, context, callback) => {
   var parameters = JSON.parse(event.body);
 
   // Construct the s3 bucket's url to download from
-  var url = "https://s3.amazonaws.com/" + process.env.S3_AUDIO_BUCKET;
   var key = parameters.key;
+  var url = "https://s3.amazonaws.com/"
+    + process.env.S3_AUDIO_BUCKET
+    + "/" + key;
 
-  // We only want files from this bucket with the prefix we want
-  /*var s3Parameters = {
-    Bucket: process.env.S3_AUDIO_BUCKET,
-    Prefix: parameters.prefix + "_",
-  };
-  console.log(s3Parameters.Prefix);*/
-
-  // Get the list of objects using our filters
-  /*s3.listObjectsV2(s3Parameters, function(err, data) {
-    if (err) console.log(err, err.stack); // error ocurred
-    else {
-      console.log("We got em");
-      if (data.Contents.length > 0) {
-        console.log("We found a thing");
-        //url += data.Contents[0].Key;  // append to the prefix to get the link
-        key = data.Contents[0].Key;
-      } else {
-        callback(null, {
-            statusCode: 500,
-            headers: {
-              'Access-Control-Allow-Origin' : '*',
-              'Access-Control-Allow-Credentials' : true,
-              'Access-Control-Allow-Methods' : 'POST',
-              'Access-Control-Allow-Headers' : 'Content-Type',
-            },
-            body: JSON.stringify({
-              url : "undefined",
-            }),
-          }
-        );
-      }
-    }
-  });
-  console.log(key);*/
-
-  // url = s3.getObject
-  url = s3.getSignedUrl('getObject', {
+  var s3Parameters = {
     Bucket: process.env.S3_AUDIO_BUCKET,
     Key: key,
-  })
+  };
 
-  console.log(url);
-
-  callback(null, {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin' : '*',
-        'Access-Control-Allow-Credentials' : true,
-        'Access-Control-Allow-Methods' : 'POST',
-        'Access-Control-Allow-Headers' : 'Content-Type',
-      },
-      body: JSON.stringify({
-        url : url,
-      }),
+  // Check if the object exists
+  s3.headObject(s3Parameters, function (err, metadata) {  
+    if (err && err.code === 'NotFound') {  
+      // The object was not found, return error
+      callback(null,
+        {
+          statusCode: 400,
+          headers: {
+            'Access-Control-Allow-Origin' : '*',
+            'Access-Control-Allow-Credentials' : true,
+            'Access-Control-Allow-Methods' : 'POST',
+            'Access-Control-Allow-Headers' : 'Content-Type',
+          },
+          body: JSON.stringify({
+            url : 'not_found',
+          }),
+        }
+      );
+    } else {
+      // We found the object, so can return a good url
+      callback(null,
+        {
+          statusCode: 200,
+          headers: {
+            'Access-Control-Allow-Origin' : '*',
+            'Access-Control-Allow-Credentials' : true,
+            'Access-Control-Allow-Methods' : 'POST',
+            'Access-Control-Allow-Headers' : 'Content-Type',
+          },
+          body: JSON.stringify({
+            url : url,
+          }),
+        }
+      );
     }
-  );
+  });
 }
-
-// module.exports.downloadFile = (event, context, callback) => {
-//   var s3 = new AWS.S3();
-//   var parameters = JSON.parse(event.body);
-
-//   var s3parameters = {
-//     Bucket: process.env.S3_AUDIO_BUCKET,
-//     Prefix: parameters.prefix,
-//   };
-// }
