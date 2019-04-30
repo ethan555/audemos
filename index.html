@@ -23,29 +23,35 @@
         display: flex;
         align-items: center;
       }
+      .header_1{
+        border: 1px solid powderblue;
+        margin: 50px;
+        align-items: center;
+        justify-content: center;
+      }
     </style>
   </head>
 
   <body>
 
     <div class="aligner">
-      Loaded file: <p id='audioFile'></p>
+      <b>Loaded file:</b> <p id='audioFile'></p>
       <audio controls>
         <source id='audioURL' type="audio/mp3" src=""></source>
       </audio>
       <form name="audioForm">
-        Enter Access Key:<br>
-        <input type="text" name="AccessKey"><br>
+        <b>Enter Access Key:</b><br>
+        <input type="text" name="AccessKey">
         <input type="submit" value="Submit">
       </form>
 
-      <div id="drop">Drop mp3 file here.</div>
+      <div class="header_1" id="drop">Drop mp3 file here.</div>
       <button onclick="copyURL()">Copy Latest URL</button>
       <button onclick="copyKey()">Copy Latest Key</button>
       <div id="list">
         <h1>Access Keys:</h1>
       </div>
-    <div>
+    </div>
       
     
 
@@ -181,6 +187,8 @@
       console.log(accessKey);
       if (accessKey != null) {
         handleKey();
+      } else {
+        document.getElementById('audioFile').innerHTML = "None";
       }
     </script>
 
