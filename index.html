@@ -103,7 +103,6 @@
             .then(function(json) {
               timestamp = "" + json.timestamp;
               key = timestamp + "_" + key;
-              console.log(timestamp);
               return fetch(json.uploadURL, {
                 method: "PUT",
                 body: new Blob([reader.result], {key: json.key, type: file.type})
@@ -147,13 +146,8 @@
           } else {
             // The file was found, update the elements to the new URL
             url = json.url;
-            // console.log(url);
-            // url = "https://s3.amazonaws.com/audemos-dev-demos/" + accessKey;
-            // console.log(url);
 
             document.getElementById('audioURL').src = url;
-            document.getElementById('audioURL').setAttribute('src',url);
-            // console.log(document.getElementById('audioURL').src);
             document.getElementById('audioFile').innerHTML = accessKey.split("_", 2)[1];
 
             var audioNode = document.createElement('div');
@@ -163,7 +157,6 @@
             audioNode.value = valArray;
             list.appendChild(audioNode);
             document.getElementById('audio').load();
-            // document.getElementById('audio').play();
           }
         });
       }
@@ -172,7 +165,6 @@
       function copyURL() {
         if (list.childElementCount > 1) {
           var text = list.children[1].value[0];
-          console.log(text);
           navigator.clipboard.writeText(text).then(function() {
             console.log('Async: Successfully copied URL');
           }, function(err) {
@@ -185,7 +177,6 @@
       function copyKey() {
         if (list.childElementCount > 1) {
           var text = list.children[1].value[1];
-          console.log(text);
           navigator.clipboard.writeText(text).then(function() {
             console.log('Async: Successfully copied URL');
           }, function(err) {
