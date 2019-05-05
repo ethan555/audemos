@@ -78,6 +78,7 @@
       </form><br>
 
       <div class="cloud" id="drop">Drop mp3 file here.</div>
+      <p id='progressMessage'></p>
       <button class="button" onclick="copyURL()">Copy Latest URL</button>
       <button class="button" onclick="copyKey()">Copy Latest Key</button>
       <br>
@@ -110,7 +111,11 @@
       function handleDrop(e) {
         e.preventDefault();
         var dataTransfer = e.dataTransfer;
-        var files = dt.files;
+        var files = dataTransfer.files;
+
+        // Give progress message
+        document.getElementById("progressMessage").innerHTML = "Uploading...";
+
         // Iterate over the dropped files and read them
         for (var i = 0; i < files.length; i ++) {
           var file = files[i];
@@ -152,6 +157,9 @@
               var valArray = [url, key];
               audioNode.value = valArray;
               list.appendChild(audioNode);
+
+              // Get rid of progress message
+              document.getElementById("progressMessage").innerHTML = "";
             });
           });
 
