@@ -13,7 +13,7 @@
         justify-content: center;
         flex-direction: column;
       }
-      #drop {
+/*      #drop {
         height: 100px;
         width: 300px;
         border-radius: 300px;
@@ -22,13 +22,53 @@
         font-size: 20px;
         display: flex;
         align-items: center;
-      }
+      }*/
       .header_1{
         border: 1px solid powderblue;
         margin: 50px;
         align-items: center;
         justify-content: center;
       }
+      .cloud{
+        text-align: : center;
+        box-sizing: border-box;
+        width: 150px;
+        height: 150px;
+        padding: 80px 1em 0 1em;
+        margin: 0 100px;
+        position: relative;
+        background-color: #A4C9CF;
+        border-radius: 100% 100% 0 0;
+      }
+      .cloud::before, .cloud::after{
+        content:'';
+        position: absolute;
+        bottom: 0;
+        z-index: -1;
+        background-color: #A4C9CF;
+        border-radius: 100%;
+      }
+      .cloud::before{
+        width:125px;
+        height: 125px;
+        left: -80px;
+        border-bottom-right-radius: 0;
+      }
+      .cloud::after{
+        width: 100px;
+        height: 100px;
+        right: -60px;
+        border-bottom-left-radius: 0;
+      }
+      .button{
+        margin: 5px;
+      }
+      .button:hover{
+        box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24),0 17px 50px 0 rgba(0,0,0,0.19);
+        background-color: black;
+        color: white;
+      }
+
     </style>
   </head>
 
@@ -46,9 +86,9 @@
         <input type="submit" value="Submit">
       </form>
 
-      <div class="header_1" id="drop">Drop mp3 file here.</div>
-      <button onclick="copyURL()">Copy Latest URL</button>
-      <button onclick="copyKey()">Copy Latest Key</button>
+      <div class="cloud" id="drop">Drop mp3 file here.</div>
+      <button class="button" onclick="copyURL()">Copy Latest URL</button>
+      <button class="button" onclick="copyKey()">Copy Latest Key</button>
       <div id="list">
         <h1>Access Keys:</h1>
       </div>
@@ -103,6 +143,7 @@
             .then(function(json) {
               timestamp = "" + json.timestamp;
               key = timestamp + "_" + key;
+              console.log(timestamp);
               return fetch(json.uploadURL, {
                 method: "PUT",
                 body: new Blob([reader.result], {key: json.key, type: file.type})
@@ -146,8 +187,13 @@
           } else {
             // The file was found, update the elements to the new URL
             url = json.url;
+            // console.log(url);
+            // url = "https://s3.amazonaws.com/audemos-dev-demos/" + accessKey;
+            // console.log(url);
 
             document.getElementById('audioURL').src = url;
+            // document.getElementById('audioURL').setAttribute('src',url);
+            // console.log(document.getElementById('audioURL').src);
             document.getElementById('audioFile').innerHTML = accessKey.split("_", 2)[1];
 
             var audioNode = document.createElement('div');
@@ -157,6 +203,7 @@
             audioNode.value = valArray;
             list.appendChild(audioNode);
             document.getElementById('audio').load();
+            // document.getElementById('audio').play();
           }
         });
       }
@@ -165,6 +212,7 @@
       function copyURL() {
         if (list.childElementCount > 1) {
           var text = list.children[1].value[0];
+          console.log(text);
           navigator.clipboard.writeText(text).then(function() {
             console.log('Async: Successfully copied URL');
           }, function(err) {
@@ -177,6 +225,7 @@
       function copyKey() {
         if (list.childElementCount > 1) {
           var text = list.children[1].value[1];
+          console.log(text);
           navigator.clipboard.writeText(text).then(function() {
             console.log('Async: Successfully copied URL');
           }, function(err) {
