@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>Upload to S3</title>
+    <title>Audemos: Share Your Music Ideas</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <style>
       body {
@@ -13,31 +13,22 @@
         justify-content: center;
         flex-direction: column;
       }
-/*      #drop {
-        height: 100px;
-        width: 300px;
-        border-radius: 300px;
-        color: #FFFFFF;
-        background-color: #000c93;
-        font-size: 20px;
-        display: flex;
-        align-items: center;
-      }*/
       .header_1{
-        border: 1px solid powderblue;
-        margin: 50px;
+        border: 1px solid #000c93;
+        margin: 10px;
         align-items: center;
         justify-content: center;
       }
       .cloud{
-        text-align: : center;
+        text-align: center;
         box-sizing: border-box;
         width: 150px;
         height: 150px;
         padding: 80px 1em 0 1em;
         margin: 0 100px;
         position: relative;
-        background-color: #A4C9CF;
+        color: white;
+        background-color: #000c93;
         border-radius: 100% 100% 0 0;
       }
       .cloud::before, .cloud::after{
@@ -45,7 +36,7 @@
         position: absolute;
         bottom: 0;
         z-index: -1;
-        background-color: #A4C9CF;
+        background-color: #000c93;
         border-radius: 100%;
       }
       .cloud::before{
@@ -65,7 +56,7 @@
       }
       .button:hover{
         box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24),0 17px 50px 0 rgba(0,0,0,0.19);
-        background-color: black;
+        background-color: #000c93;
         color: white;
       }
 
@@ -79,23 +70,22 @@
       <audio id="audio" controls>
         <source id='audioURL' type="audio/mp3" src=""></source>
         Your browser does not support this audio player.
-      </audio>
+      </audio><br>
       <form name="audioForm">
         <b>Enter Access Key:</b><br>
         <input type="text" name="AccessKey">
         <input type="submit" value="Submit">
-      </form>
+      </form><br>
 
       <div class="cloud" id="drop">Drop mp3 file here.</div>
       <button class="button" onclick="copyURL()">Copy Latest URL</button>
       <button class="button" onclick="copyKey()">Copy Latest Key</button>
+      <br>
       <div id="list">
-        <h1>Access Keys:</h1>
+        <b>Access Keys:</b>
       </div>
     </div>
-      
     
-
     <script type="text/javascript">
       var apiBaseURL = "https://tdyubs8tnh.execute-api.us-east-1.amazonaws.com/dev"
       var drop = document.getElementById('drop');
@@ -119,15 +109,19 @@
       // Handle when the user drops a file into the dropzone
       function handleDrop(e) {
         e.preventDefault();
-        var dt    = e.dataTransfer;
+        var dataTransfer = e.dataTransfer;
         var files = dt.files;
-        for (var i=0; i<files.length; i++) {
+        // Iterate over the dropped files and read them
+        for (var i = 0; i < files.length; i ++) {
           var file = files[i];
           var timestamp = "";
           var key = file.name.split(" ").join("");
           var reader = new FileReader();
+
+          // Add an event listener to the reader reading the file
           reader.addEventListener('loadend', function(e) {
-            fetch(apiBaseURL+"/getURL", {
+            // Send a request to Lambda to get an upload URL
+            fetch(apiBaseURL + "/getURL", {
               method: "POST",
               headers: {
                 'Content-Type': 'application/json',
@@ -138,18 +132,20 @@
               })
             })
             .then(function(response) {
+              // Receive the upload URL
               return response.json();
             })
             .then(function(json) {
+              // Construct the key and send the file to s3
               timestamp = "" + json.timestamp;
               key = timestamp + "_" + key;
-              console.log(timestamp);
               return fetch(json.uploadURL, {
                 method: "PUT",
                 body: new Blob([reader.result], {key: json.key, type: file.type})
-              })
+              });
             })
             .then(function() {
+              // Update the list of uploaded keys
               var audioNode = document.createElement('div');
               var url = window.location.origin + window.location.pathname + "?AccessKey=" + key;
               audioNode.innerHTML = '<a href="'+ url +'">'+ key +'</a>';
@@ -158,6 +154,7 @@
               list.appendChild(audioNode);
             });
           });
+
           reader.readAsArrayBuffer(file);
         }
         return false;
@@ -167,6 +164,7 @@
       function handleKey() {
         var url = "";
 
+        // Request the URL using our accesskey from Lambda
         fetch(apiBaseURL+"/getFileURL", {
           method: "POST",
           headers: {
@@ -180,22 +178,20 @@
           return response.json();
         })
         .then(function(json) {
+          // If we found the file, update the audio player
           if (json.url === "not_found") {
             // The file was not found, say so
             console.log("File not found");
             document.getElementById('audioFile').innerHTML = "Not Found";
           } else {
-            // The file was found, update the elements to the new URL
+            // The file was found, update the elements to the file URL
             url = json.url;
-            // console.log(url);
-            // url = "https://s3.amazonaws.com/audemos-dev-demos/" + accessKey;
-            // console.log(url);
 
+            // Update the source of the audio player
             document.getElementById('audioURL').src = url;
-            // document.getElementById('audioURL').setAttribute('src',url);
-            // console.log(document.getElementById('audioURL').src);
             document.getElementById('audioFile').innerHTML = accessKey.split("_", 2)[1];
 
+            // Update the list of keys
             var audioNode = document.createElement('div');
             url = window.location.origin + window.location.pathname + "?AccessKey=" + accessKey;
             audioNode.innerHTML = '<a href="'+ url + '">'+ accessKey +'</a>';
@@ -203,7 +199,6 @@
             audioNode.value = valArray;
             list.appendChild(audioNode);
             document.getElementById('audio').load();
-            // document.getElementById('audio').play();
           }
         });
       }
@@ -234,12 +229,12 @@
         }
       }
 
-      // Tells the browser that we *can* drop on this target
+      // Tell the browser we can drop on this target
       drop.addEventListener('dragenter', cancel);
       drop.addEventListener('dragover', cancel);
       drop.addEventListener('drop', handleDrop);
 
-      console.log(accessKey);
+      // Check if the access key is set, if it is, load the file
       if (accessKey != null) {
         handleKey();
       } else {
