@@ -70,15 +70,17 @@
 
     <div class="aligner">
       <b>Loaded file:</b> <p id='audioFile'></p>
-      <audio id="audio" controls>
+      <audio id="audio" controls controlsList="nodownload">
         <source id='audioURL' type="audio/mp3" src=""></source>
         Your browser does not support this audio player.
       </audio>
-      <b>Downloads remaining for this file:</b> <p id="numDownload"></p>
-      <a id="downloadLink" href="" download>
-        <button class="button" onclick="downloadFile()">Download</button>
-      </a>
-      <br>
+      <b>Downloads remaining for this file:
+          <b id="numDownload"></b>
+      </b>
+      
+      <a id="downloadLink" href="" download></a>
+      <button class="button" onclick="downloadFile()">Download</button>
+      
       <form name="audioForm">
         <b>Enter Access Key:</b><br>
         <input type="text" name="AccessKey">
@@ -86,10 +88,24 @@
       </form><br>
 
       <div class="cloud" id="drop">Drop mp3 file here.</div>
-      <p id='progressMessage'></p>
-      <button class="button" onclick="copyURL()">Copy Latest URL</button>
-      <button class="button" onclick="copyKey()">Copy Latest Key</button>
-      <br>
+      <b>Select how many times the file can be downloaded:</b>
+      <form id="downloadNumber">
+        <label class="radio-inline">
+          <input type="radio" name="downloads" value=-1> unlimited <br>
+          <input type="radio" name="downloads" value=0 checked> 0 <br>
+          <input type="radio" name="downloads" value=1> 1 <br>
+        </label>
+        <label class="radio-inline">
+          <input type="radio" name="downloads" value=5> 5 <br>
+          <input type="radio" name="downloads" value=500> 500 <br>
+        </label>
+      </form>
+      <b id='progressMessage'></b>
+      <p>
+        <button class="button" onclick="copyURL()">Copy Latest URL</button>
+        <button class="button" onclick="copyKey()">Copy Latest Key</button>
+      </p>
+      
       <div id="list">
         <b>Access Keys:</b>
       </div>
@@ -150,7 +166,7 @@
             })
             .then(function(json) {
               // Make sure the file was accepted
-              throw new error("Unsupported Filetype");
+              if (json.key === "denied") {return false;}
               // Construct the key and send the file to s3
               timestamp = "" + json.timestamp;
               key = timestamp + "_" + key;
@@ -160,6 +176,10 @@
               });
             })
             .then(function(value) {
+              if (value === false) {
+                document.getElementById("progressMessage").innerHTML = "Unsupported Filetype.";
+                return false;
+              }
               // Update the list of uploaded keys
               var audioNode = document.createElement('div');
               var url = window.location.origin + window.location.pathname + "?AccessKey=" + key;
@@ -171,6 +191,18 @@
               // Get rid of progress message
               document.getElementById("progressMessage").innerHTML = "";
             
+              // Get the selcted value of how many downloads to allow
+              var downloads = 0;
+              var radio = document.getElementsByName("downloads");
+              for (var i = 0, length = radio.length; i < length; i++) {
+                if (radio[i].checked) {
+                  // Set how many downloads to use
+                  downloads = radio[i].value;
+                  // There will only be one checked radio button
+                  break;
+                }
+              }
+
               fetch(apiBaseURL+"/setDownloadTag", {
                 // Set the download tag of the object
                 method: "POST",
@@ -178,8 +210,8 @@
                   'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                  key: accessKey,
-                  downloads: 3,
+                  key: key,
+                  downloads: downloads,
                 })
               })
               .then(function(response) {
@@ -257,6 +289,8 @@
             .then(function(json) {
               if (json.download === "failed") {
                 console.log("failed to get number of downloads");
+              } else if (json.download === "-1") {
+                document.getElementById('numDownload').innerHTML = "Unlimited";
               } else {
                 document.getElementById('numDownload').innerHTML = json.download;
               }
@@ -309,8 +343,12 @@
         .then(function(json) {
           if (json.response === "failed") {
             console.log("failed to update download tag");
+          } else if (json.response === "denied") {
+            console.log("not allowed to download");
+            document.getElementById('numDownload').innerHTML = "0";
           } else {
             document.getElementById('numDownload').innerHTML = json.response;
+            window.open(document.getElementById('downloadLink').href, '_blank');
           }
         });
       }

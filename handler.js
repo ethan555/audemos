@@ -62,8 +62,10 @@ module.exports.getURL = (event, context, callback) => {
 
 module.exports.setDownloadTag = (event, context, callback) => {
   var s3 = new AWS.S3();
-  var parameters = parseInt(JSON.parse(event.body));
+  var parameters = JSON.parse(event.body);
   var key = parameters.key;
+
+  console.log("LOL");
 
   // Set download tag of object
   var s3Parameters = {
@@ -73,14 +75,17 @@ module.exports.setDownloadTag = (event, context, callback) => {
       TagSet: [
         {
           Key: "downloads", 
-          Value: "" + parameters.downloads,
-        },
+          Value: parameters.downloads
+        }
       ]
     }
   };
+
+  console.log(key);
    
   s3.putObjectTagging(s3Parameters, function(err, data) {
     if (err) {
+      console.log(s3Parameters["Key"]);
       console.log(err, err.stack);
       callback(null, {
           statusCode: 400,
@@ -286,6 +291,7 @@ module.exports.downloadTag = (event, context, callback) => {
       } else {
         // Decrement the download count
         var newDownloads = "" + (downloads - 1);
+        if (downloads - 1 < 0) {newDownloads = "" + -1}
         var updateParameters = {
           Bucket: process.env.S3_AUDIO_BUCKET,
           Key: key,
