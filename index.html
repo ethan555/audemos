@@ -302,7 +302,7 @@
       // Copy the latest uploaded url
       function copyURL() {
         if (list.childElementCount > 1) {
-          var text = list.children[1].value[0];
+          var text = list.children[list.childElementCount-1].value[0];
           console.log(text);
           navigator.clipboard.writeText(text).then(function() {
             console.log('Async: Successfully copied URL');
@@ -315,7 +315,7 @@
       // Copy the latest uploaded key
       function copyKey() {
         if (list.childElementCount > 1) {
-          var text = list.children[1].value[1];
+          var text = list.children[list.childElementCount-1].value[1];
           console.log(text);
           navigator.clipboard.writeText(text).then(function() {
             console.log('Async: Successfully copied URL');
