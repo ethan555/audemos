@@ -1,7 +1,10 @@
 <html>
   <head>
-    <title>Upload to S3</title>
+    <title>Audemos: Share Your Music Ideas</title>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    
     <style>
       body {
         font-family: 'Verdana', Verdana, sans-serif;
@@ -13,67 +16,141 @@
         justify-content: center;
         flex-direction: column;
       }
-      #drop {
-        height: 300px;
-        width: 300px;
-        border-radius: 300px;
-        color: #FFFFFF;
-        background-color: #000c93;
-        font-size: 20px;
-        display: flex;
+      .header_1{
+        border: 1px solid #000c93;
+        margin: 10px;
         align-items: center;
+        justify-content: center;
       }
+      .cloud{
+        text-align: center;
+        box-sizing: border-box;
+        width: 150px;
+        height: 150px;
+        padding: 80px 1em 0 1em;
+        margin: 0 100px;
+        position: relative;
+        color: white;
+        background-color: #000c93;
+        border-radius: 100% 100% 0 0;
+      }
+      .cloud::before, .cloud::after{
+        content:'';
+        position: absolute;
+        bottom: 0;
+        z-index: -1;
+        background-color: #000c93;
+        border-radius: 100%;
+      }
+      .cloud::before{
+        width:125px;
+        height: 125px;
+        left: -80px;
+        border-bottom-right-radius: 0;
+      }
+      .cloud::after{
+        width: 100px;
+        height: 100px;
+        right: -60px;
+        border-bottom-left-radius: 0;
+      }
+      .button{
+        margin: 5px;
+      }
+      .button:hover{
+        box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24),0 17px 50px 0 rgba(0,0,0,0.19);
+        background-color: #000c93;
+        color: white;
+      }
+
     </style>
   </head>
 
   <body>
-    <!-- <form action="%S3_URL%" method="post" enctype="multipart/form-data">
-      Key to upload:
-      <input type="input"  name="key" value="${filename}" /><br />
-      <input type="hidden" name="AWSAccessKeyId" value="%AWS_ACCESS_KEY%">
-      <input type="hidden" name="acl" value="public-read" />
-      <input type="hidden" name="success_action_status" value="201">
-      Content-Type:
-      <input type="input"  name="Content-Type" value="audio/mp3" /><br />
 
-      Tags for File:
-      <input type="input"  name="x-amz-meta-tag" value="" /><br />
-      <input type="hidden" name="Policy" value='%POLICY_BASE64' />
-      <input type="hidden" name="X-Amz-Signature" value="%SIGNATURE%" />
-      File:
-      <input type="file"   name="file" /> <br /> -->
-      <!-- The elements after this will be ignored -->
-      <!-- <input type="submit" name="submit" value="Upload to Amazon S3" />
-    </form> -->
     <div class="aligner">
-      <div id="drop">Drop mp3 file here.</div>
+      <b>Loaded file:</b> <p id='audioFile'></p>
+      <audio id="audio" controls controlsList="nodownload">
+        <source id='audioURL' type="audio/mp3" src=""></source>
+        Your browser does not support this audio player.
+      </audio>
+      <b>Downloads remaining for this file:
+          <b id="numDownload"></b>
+      </b>
+      
+      <a id="downloadLink" href="" download></a>
+      <button class="button" onclick="downloadFile()">Download</button>
+      
+      <form name="audioForm">
+        <b>Enter Access Key:</b><br>
+        <input type="text" name="AccessKey">
+        <input type="submit" value="Submit">
+      </form><br>
+
+      <div class="cloud" id="drop">Drop mp3 file here.</div>
+      <b>Select how many times the file can be downloaded:</b>
+      <form id="downloadNumber">
+        <label class="radio-inline">
+          <input type="radio" name="downloads" value=-1> unlimited <br>
+          <input type="radio" name="downloads" value=0 checked> 0 <br>
+          <input type="radio" name="downloads" value=1> 1 <br>
+        </label>
+        <label class="radio-inline">
+          <input type="radio" name="downloads" value=5> 5 <br>
+          <input type="radio" name="downloads" value=500> 500 <br>
+        </label>
+      </form>
+      <b id='progressMessage'></b>
+      <p>
+        <button class="button" onclick="copyURL()">Copy Latest URL</button>
+        <button class="button" onclick="copyKey()">Copy Latest Key</button>
+      </p>
+      
       <div id="list">
-        <h1>Uploaded Files:</h1>
+        <b>Access Keys:</b>
       </div>
-    <div>
-
-
-
+    </div>
+    
     <script type="text/javascript">
       var apiBaseURL = "https://tdyubs8tnh.execute-api.us-east-1.amazonaws.com/dev"
       var drop = document.getElementById('drop');
       var list = document.getElementById('list');
+      var accessKey = getURLVars()["AccessKey"];
 
       function cancel(e) {
         e.preventDefault();
         return false;
       }
 
+      // Get the variables stored in our URL.
+      function getURLVars() {
+        var vars = {};
+        var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+            vars[key] = value;
+        });
+        return vars;
+      }
+
+      // Handle when the user drops a file into the dropzone
       function handleDrop(e) {
         e.preventDefault();
-        var dt    = e.dataTransfer;
-        var files = dt.files;
-        for (var i=0; i<files.length; i++) {
+        var dataTransfer = e.dataTransfer;
+        var files = dataTransfer.files;
+
+        // Give progress message
+        document.getElementById("progressMessage").innerHTML = "Uploading...";
+
+        // Iterate over the dropped files and read them
+        for (var i = 0; i < files.length; i ++) {
           var file = files[i];
           var timestamp = "";
+          var key = file.name.split(" ").join("");
           var reader = new FileReader();
+
+          // Add an event listener to the reader reading the file
           reader.addEventListener('loadend', function(e) {
-            fetch(apiBaseURL+"/getURL", {
+            // Send a request to Lambda to get an upload URL
+            fetch(apiBaseURL + "/getURL", {
               method: "POST",
               headers: {
                 'Content-Type': 'application/json',
@@ -84,52 +161,210 @@
               })
             })
             .then(function(response) {
+              // Receive the upload URL
               return response.json();
             })
             .then(function(json) {
+              // Make sure the file was accepted
+              if (json.key === "denied") {return false;}
+              // Construct the key and send the file to s3
               timestamp = "" + json.timestamp;
-              console.log(timestamp);
+              key = timestamp + "_" + key;
               return fetch(json.uploadURL, {
                 method: "PUT",
                 body: new Blob([reader.result], {key: json.key, type: file.type})
-              })
+              });
             })
-            .then(function() {
-              var uploadedFileNode = document.createElement('div');
-              var url = window.location.origin + window.location.pathname;
-              uploadedFileNode.innerHTML = '<a href="'+ url + timestamp +'">'+ timestamp +'</a>';
-              list.appendChild(uploadedFileNode);
+            .then(function(value) {
+              if (value === false) {
+                document.getElementById("progressMessage").innerHTML = "Unsupported Filetype.";
+                return false;
+              }
+              // Update the list of uploaded keys
+              var audioNode = document.createElement('div');
+              var url = window.location.origin + window.location.pathname + "?AccessKey=" + key;
+              audioNode.innerHTML = '<a href="'+ url +'">'+ key +'</a>';
+              var valArray = [url, key];
+              audioNode.value = valArray;
+              list.appendChild(audioNode);
+
+              // Get rid of progress message
+              document.getElementById("progressMessage").innerHTML = "";
+            
+              // Get the selcted value of how many downloads to allow
+              var downloads = 0;
+              var radio = document.getElementsByName("downloads");
+              for (var i = 0, length = radio.length; i < length; i++) {
+                if (radio[i].checked) {
+                  // Set how many downloads to use
+                  downloads = radio[i].value;
+                  // There will only be one checked radio button
+                  break;
+                }
+              }
+
+              fetch(apiBaseURL+"/setDownloadTag", {
+                // Set the download tag of the object
+                method: "POST",
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  key: key,
+                  downloads: downloads,
+                })
+              })
+              .then(function(response) {
+                return response.json();
+              })
+              .then(function(json) {
+                if (json.response === "failed") {
+                  console.log("Failed to update tags.");
+                }
+              });
             });
           });
+
           reader.readAsArrayBuffer(file);
         }
         return false;
       }
 
-      // <audio controls preload="metadata" style=" width:300px;">
-      //   <source src="" type="audio/mpeg">
-      //   Your browser does not support the audio element.
-      // </audio><br />
-      // // <audio controls="controls">
-      // //   <source src="" type="audio/mpeg" >
-      // // </audio><br />
+      // Handle when the user enters a key into the form
+      function handleKey() {
+        var url = "";
 
-      // Tells the browser that we *can* drop on this target
+        // Request the URL using our accesskey from Lambda
+        fetch(apiBaseURL+"/getFileURL", {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            key: accessKey,
+          })
+        })
+        .then(function(response) {
+          return response.json();
+        })
+        .then(function(json) {
+          // If we found the file, update the audio player
+          if (json.url === "not_found") {
+            // The file was not found, say so
+            console.log("File not found");
+            document.getElementById('audioFile').innerHTML = "Not Found";
+          } else {
+            // The file was found, update the elements to the file URL
+            url = json.url;
+            downloadURL = json.downloadurl;
+
+            // Update the source of the audio player
+            document.getElementById('audioURL').src = url;
+            document.getElementById('audioFile').innerHTML = accessKey.split("_", 2)[1];
+
+            // Update the download link
+            document.getElementById('downloadLink').href = downloadURL;
+            // Update the list of keys
+            var audioNode = document.createElement('div');
+            url = window.location.origin + window.location.pathname + "?AccessKey=" + accessKey;
+            audioNode.innerHTML = '<a href="'+ url + '">'+ accessKey +'</a>';
+            var valArray = [url, accessKey];
+            audioNode.value = valArray;
+            list.appendChild(audioNode);
+            document.getElementById('audio').load();
+
+            // Update how many times you can download this
+            fetch(apiBaseURL+"/getDownloadTag", {
+              method: "POST",
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                key: accessKey,
+              })
+            })
+            .then(function(response) {
+              return response.json();
+            })
+            .then(function(json) {
+              if (json.download === "failed") {
+                console.log("failed to get number of downloads");
+              } else if (json.download === "-1") {
+                document.getElementById('numDownload').innerHTML = "Unlimited";
+              } else {
+                document.getElementById('numDownload').innerHTML = json.download;
+              }
+            });
+          }
+        });
+      }
+
+      // Copy the latest uploaded url
+      function copyURL() {
+        if (list.childElementCount > 1) {
+          var text = list.children[list.childElementCount-1].value[0];
+          console.log(text);
+          navigator.clipboard.writeText(text).then(function() {
+            console.log('Async: Successfully copied URL');
+          }, function(err) {
+            console.error('Async: Could not copy URL');
+          });
+        }
+      }
+
+      // Copy the latest uploaded key
+      function copyKey() {
+        if (list.childElementCount > 1) {
+          var text = list.children[list.childElementCount-1].value[1];
+          console.log(text);
+          navigator.clipboard.writeText(text).then(function() {
+            console.log('Async: Successfully copied URL');
+          }, function(err) {
+            console.error('Async: Could not copy URL');
+          });
+        }
+      }
+
+      // Update the download tag
+      function downloadFile() {
+        // Call lambda function
+        fetch(apiBaseURL+"/downloadTag", {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            key: accessKey,
+          })
+        })
+        .then(function(response) {
+          return response.json();
+        })
+        .then(function(json) {
+          if (json.response === "failed") {
+            console.log("failed to update download tag");
+          } else if (json.response === "denied") {
+            console.log("not allowed to download");
+            document.getElementById('numDownload').innerHTML = "0";
+          } else {
+            document.getElementById('numDownload').innerHTML = json.response;
+            window.open(document.getElementById('downloadLink').href, '_blank');
+          }
+        });
+      }
+
+      // Tell the browser we can drop on this target
       drop.addEventListener('dragenter', cancel);
       drop.addEventListener('dragover', cancel);
       drop.addEventListener('drop', handleDrop);
+
+      // Check if the access key is set, if it is, load the file
+      if (accessKey != null) {
+        handleKey();
+      } else {
+        document.getElementById('audioFile').innerHTML = "None";
+      }
     </script>
-
-    <audio controls>
-      <source src="" type="audio/mp3">
-    </audio>
-    <form>
-      Enter Access key:<br>
-      <input type="text" name="AccessKey"><br>
-      <input type="submit" value="Submit">
-    </form>
-
-
 
   </body>
 </html>
