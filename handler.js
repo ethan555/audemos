@@ -6,7 +6,14 @@ module.exports.getURL = (event, context, callback) => {
   var s3 = new AWS.S3();
   var parameters = JSON.parse(event.body);
 
+  // Make sure the name is not an issue for url encoding
   var parsed = parameters.name.split(" ").join("");
+  const notAllowed = ["_", "(", ")", "[", "]", "<", ">", "%", "{", "}", "|", "/", "\\", "^", "~", "`"];
+  for (var i = 0, length = notAllowed.length; i < length; i ++) {
+    parsed = parsed.split(notAllowed[i]).join("");
+  }
+
+  // Get the file type
   var fileType = parameters.name.split(".").pop();
 
   const supportedSet = new Set(["mp3", "wav", "ogg", "mp4"]);
