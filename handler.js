@@ -7,6 +7,29 @@ module.exports.getURL = (event, context, callback) => {
   var parameters = JSON.parse(event.body);
 
   var parsed = parameters.name.split(" ").join("");
+  var fileType = parameters.name.split(".").pop();
+
+  const supportedSet = new Set(["mp3", "wav", "ogg", "mp4"]);
+  if (!supportedSet.has(fileType)) {
+    // If the file type is not supported, return forbidden
+    callback(null, {
+        statusCode: 400,
+        headers: {
+          'Access-Control-Allow-Origin' : '*',
+          'Access-Control-Allow-Credentials' : true,
+          'Access-Control-Allow-Methods' : 'POST',
+          'Access-Control-Allow-Headers' : 'Content-Type',
+        },
+        body: JSON.stringify({
+          key : "denied",
+          timestamp : "denied",
+          uploadURL : "denied",
+        }),
+      }
+    );
+    return;
+  }
+
   // Get the timestamp
   var timestamp = "" + Date.now();
   var key = timestamp + "_" + parsed;
@@ -305,7 +328,7 @@ module.exports.downloadTag = (event, context, callback) => {
                   'Access-Control-Allow-Headers' : 'Content-Type',
                 },
                 body: JSON.stringify({
-                  response : "success",
+                  response : newDownloads,
                 }),
               }
             );

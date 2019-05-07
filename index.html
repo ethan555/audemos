@@ -73,7 +73,12 @@
       <audio id="audio" controls>
         <source id='audioURL' type="audio/mp3" src=""></source>
         Your browser does not support this audio player.
-      </audio><br>
+      </audio>
+      <b>Downloads remaining for this file:</b> <p id="numDownload"></p>
+      <a id="downloadLink" href="" download>
+        <button class="button" onclick="downloadFile()">Download</button>
+      </a>
+      <br>
       <form name="audioForm">
         <b>Enter Access Key:</b><br>
         <input type="text" name="AccessKey">
@@ -144,6 +149,8 @@
               return response.json();
             })
             .then(function(json) {
+              // Make sure the file was accepted
+              throw new error("Unsupported Filetype");
               // Construct the key and send the file to s3
               timestamp = "" + json.timestamp;
               key = timestamp + "_" + key;
@@ -152,7 +159,7 @@
                 body: new Blob([reader.result], {key: json.key, type: file.type})
               });
             })
-            .then(function() {
+            .then(function(value) {
               // Update the list of uploaded keys
               var audioNode = document.createElement('div');
               var url = window.location.origin + window.location.pathname + "?AccessKey=" + key;
@@ -163,6 +170,26 @@
 
               // Get rid of progress message
               document.getElementById("progressMessage").innerHTML = "";
+            
+              fetch(apiBaseURL+"/setDownloadTag", {
+                // Set the download tag of the object
+                method: "POST",
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  key: accessKey,
+                  downloads: 3,
+                })
+              })
+              .then(function(response) {
+                return response.json();
+              })
+              .then(function(json) {
+                if (json.response === "failed") {
+                  console.log("Failed to update tags.");
+                }
+              });
             });
           });
 
@@ -197,11 +224,14 @@
           } else {
             // The file was found, update the elements to the file URL
             url = json.url;
+            downloadURL = json.downloadurl;
 
             // Update the source of the audio player
             document.getElementById('audioURL').src = url;
             document.getElementById('audioFile').innerHTML = accessKey.split("_", 2)[1];
 
+            // Update the download link
+            document.getElementById('downloadLink').href = downloadURL;
             // Update the list of keys
             var audioNode = document.createElement('div');
             url = window.location.origin + window.location.pathname + "?AccessKey=" + accessKey;
@@ -210,6 +240,27 @@
             audioNode.value = valArray;
             list.appendChild(audioNode);
             document.getElementById('audio').load();
+
+            // Update how many times you can download this
+            fetch(apiBaseURL+"/getDownloadTag", {
+              method: "POST",
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                key: accessKey,
+              })
+            })
+            .then(function(response) {
+              return response.json();
+            })
+            .then(function(json) {
+              if (json.download === "failed") {
+                console.log("failed to get number of downloads");
+              } else {
+                document.getElementById('numDownload').innerHTML = json.download;
+              }
+            });
           }
         });
       }
@@ -238,6 +289,30 @@
             console.error('Async: Could not copy URL');
           });
         }
+      }
+
+      // Update the download tag
+      function downloadFile() {
+        // Call lambda function
+        fetch(apiBaseURL+"/downloadTag", {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            key: accessKey,
+          })
+        })
+        .then(function(response) {
+          return response.json();
+        })
+        .then(function(json) {
+          if (json.response === "failed") {
+            console.log("failed to update download tag");
+          } else {
+            document.getElementById('numDownload').innerHTML = json.response;
+          }
+        });
       }
 
       // Tell the browser we can drop on this target
