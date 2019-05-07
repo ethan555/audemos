@@ -37,6 +37,66 @@ module.exports.getURL = (event, context, callback) => {
   );
 };
 
+module.exports.setDownloadTag = (event, context, callback) => {
+  var s3 = new AWS.S3();
+  var parameters = parseInt(JSON.parse(event.body));
+  var key = parameters.key;
+
+  // Set download tag of object
+  var s3Parameters = {
+    Bucket: process.env.S3_AUDIO_BUCKET,
+    Key: key,
+    Tagging: {
+      TagSet: [
+        {
+          Key: "downloads", 
+          Value: "" + parameters.downloads,
+        },
+      ]
+    }
+  };
+   
+  s3.putObjectTagging(s3Parameters, function(err, data) {
+    if (err) {
+      console.log(err, err.stack);
+      callback(null, {
+          statusCode: 400,
+          headers: {
+            'Access-Control-Allow-Origin' : '*',
+            'Access-Control-Allow-Credentials' : true,
+            'Access-Control-Allow-Methods' : 'POST',
+            'Access-Control-Allow-Headers' : 'Content-Type',
+          },
+          body: JSON.stringify({
+            response : "failed",
+          }),
+        }
+      );
+    } // an error occurred
+    else {
+      console.log(data);
+      callback(null, {
+          statusCode: 200,
+          headers: {
+            'Access-Control-Allow-Origin' : '*',
+            'Access-Control-Allow-Credentials' : true,
+            'Access-Control-Allow-Methods' : 'POST',
+            'Access-Control-Allow-Headers' : 'Content-Type',
+          },
+          body: JSON.stringify({
+            response : "success",
+          }),
+        }
+      );
+    } // successful response
+    /*
+    data = {
+    VersionId: "null"
+    }
+    */
+  });
+}
+
 module.exports.getFileURL = (event, context, callback) => {
   var s3 = new AWS.S3();
   var parameters = JSON.parse(event.body);
@@ -67,11 +127,14 @@ module.exports.getFileURL = (event, context, callback) => {
           },
           body: JSON.stringify({
             url : 'not_found',
+            downloadurl : 'not_found',
           }),
         }
       );
     } else {
       // We found the object, so can return a good url
+      var downloadurl = s3.getSignedUrl('getObject', s3Parameters);
+
       callback(null,
         {
           statusCode: 200,
@@ -83,9 +146,188 @@ module.exports.getFileURL = (event, context, callback) => {
           },
           body: JSON.stringify({
             url : url,
+            downloadurl : downloadurl,
           }),
         }
       );
     }
   });
+}
+
+module.exports.getDownloadTag = (event, context, callback) => {
+  var s3 = new AWS.S3();
+  var parameters = JSON.parse(event.body);
+  var key = parameters.key;
+
+  // Set download tag of object
+  var s3parameters = {
+    Bucket: process.env.S3_AUDIO_BUCKET,
+    Key: key,
+  };
+
+  s3.getObjectTagging(s3parameters, function(err, data) {
+    if (err) {
+      callback(null, {
+          statusCode: 400,
+          headers: {
+            'Access-Control-Allow-Origin' : '*',
+            'Access-Control-Allow-Credentials' : true,
+            'Access-Control-Allow-Methods' : 'POST',
+            'Access-Control-Allow-Headers' : 'Content-Type',
+          },
+          body: JSON.stringify({
+            download : "failed",
+          }),
+        }
+      );
+      console.log(err, err.stack);
+    } // an error occurred
+    else {
+      console.log(data);
+      var download = data["TagSet"][0].Value;
+      callback(null, {
+          statusCode: 200,
+          headers: {
+            'Access-Control-Allow-Origin' : '*',
+            'Access-Control-Allow-Credentials' : true,
+            'Access-Control-Allow-Methods' : 'POST',
+            'Access-Control-Allow-Headers' : 'Content-Type',
+          },
+          body: JSON.stringify({
+            download : download,
+          }),
+        }
+      );
+      
+    } // successful response
+    /*
+    data = {
+    TagSet: [
+        {
+      Key: "Key1", 
+      Value: "Value1"
+      }
+    ],
+    }
+    */
+   });
+}
+
+module.exports.downloadTag = (event, context, callback) => {
+  var s3 = new AWS.S3();
+  var parameters = JSON.parse(event.body);
+  var key = parameters.key;
+
+  // Set download tag of object
+  var s3parameters = {
+    Bucket: process.env.S3_AUDIO_BUCKET,
+    Key: key,
+  };
+
+  s3.getObjectTagging(s3parameters, function(err, data) {
+    if (err) {
+      callback(null, {
+          statusCode: 400,
+          headers: {
+            'Access-Control-Allow-Origin' : '*',
+            'Access-Control-Allow-Credentials' : true,
+            'Access-Control-Allow-Methods' : 'POST',
+            'Access-Control-Allow-Headers' : 'Content-Type',
+          },
+          body: JSON.stringify({
+            response : "failed",
+          }),
+        }
+      );
+      console.log(err, err.stack);
+    } // an error occurred
+    else {
+      console.log(data);
+
+      // With the data, if the object has been downloaded enough, don't allow further downloads
+      var downloads = parseInt(data["TagSet"][0].Value);
+      if (downloads == 0) {
+        callback(null, {
+            statusCode: 400,
+            headers: {
+              'Access-Control-Allow-Origin' : '*',
+              'Access-Control-Allow-Credentials' : true,
+              'Access-Control-Allow-Methods' : 'POST',
+              'Access-Control-Allow-Headers' : 'Content-Type',
+            },
+            body: JSON.stringify({
+              response : "denied",
+            }),
+          }
+        );
+      } else {
+        // Decrement the download count
+        var newDownloads = "" + (downloads - 1);
+        var updateParameters = {
+          Bucket: process.env.S3_AUDIO_BUCKET,
+          Key: key,
+          Tagging: {
+            TagSet: [
+              {
+                Key: "downloads", 
+                Value: newDownloads,
+              },
+            ]
+          }
+        };
+
+        s3.putObjectTagging(updateParameters, function(err, data) {
+          if (err) {
+            // Could not update tags
+            console.log(err, err.stack);
+            callback(null, {
+                statusCode: 400,
+                headers: {
+                  'Access-Control-Allow-Origin' : '*',
+                  'Access-Control-Allow-Credentials' : true,
+                  'Access-Control-Allow-Methods' : 'POST',
+                  'Access-Control-Allow-Headers' : 'Content-Type',
+                },
+                body: JSON.stringify({
+                  response : "failed",
+                }),
+              }
+            );
+          } else {
+            // Updated tags
+            console.log(data);
+            callback(null, {
+                statusCode: 200,
+                headers: {
+                  'Access-Control-Allow-Origin' : '*',
+                  'Access-Control-Allow-Credentials' : true,
+                  'Access-Control-Allow-Methods' : 'POST',
+                  'Access-Control-Allow-Headers' : 'Content-Type',
+                },
+                body: JSON.stringify({
+                  response : "success",
+                }),
+              }
+            );
+          } // successful response
+          /*
+          data = {
+          VersionId: "null"
+          }
+          */
+        });
+      }
+      
+    } // successful response
+    /*
+    data = {
+    TagSet: [
+        {
+      Key: "Key1", 
+      Value: "Value1"
+      }
+    ],
+    }
+    */
+   });
 }
