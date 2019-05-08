@@ -157,7 +157,8 @@
               },
               body: JSON.stringify({
                 name: file.name,
-                type: file.type
+                type: file.type,
+                size: file.size
               })
             })
             .then(function(response) {
@@ -166,7 +167,8 @@
             })
             .then(function(json) {
               // Make sure the file was accepted
-              if (json.key === "denied") {return false;}
+              if (json.key === "denied") {return "denied";}
+              if (json.key === "size") {return "size";}
               // Construct the key and send the file to s3
               timestamp = "" + json.timestamp;
               key = timestamp + "_" + key;
@@ -176,8 +178,11 @@
               });
             })
             .then(function(value) {
-              if (value === false) {
+              if (value === "denied") {
                 document.getElementById("progressMessage").innerHTML = "Unsupported Filetype.";
+                return false;
+              } else if (value === "size") {
+                document.getElementById("progressMessage").innerHTML = "Too large: File is larger than 100MB.";
                 return false;
               }
               // Update the list of uploaded keys

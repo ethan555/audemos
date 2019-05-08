@@ -13,6 +13,27 @@ module.exports.getURL = (event, context, callback) => {
     parsed = parsed.split(notAllowed[i]).join("");
   }
 
+  // Check that the file is not too big
+  if (parameters.size > 1024*1024*100) {
+    // If the file type is not supported, return forbidden
+    callback(null, {
+        statusCode: 400,
+        headers: {
+          'Access-Control-Allow-Origin' : '*',
+          'Access-Control-Allow-Credentials' : true,
+          'Access-Control-Allow-Methods' : 'POST',
+          'Access-Control-Allow-Headers' : 'Content-Type',
+        },
+        body: JSON.stringify({
+          key : "size",
+          timestamp : "size",
+          uploadURL : "size",
+        }),
+      }
+    );
+    return;
+  }
+
   // Get the file type
   var fileType = parameters.name.split(".").pop();
 
