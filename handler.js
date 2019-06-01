@@ -8,7 +8,7 @@ module.exports.getURL = (event, context, callback) => {
 
   // Make sure the name is not an issue for url encoding
   var parsed = parameters.name.split(" ").join("");
-  const notAllowed = ["_", "(", ")", "[", "]", "<", ">", "%", "{", "}", "|", "/", "\\", "^", "~", "`"];
+  const notAllowed = ["_", "(", ")", "[", "]", "<", ">", "%", "{", "}", "|", "/", "\\", "^", "~", "`", "$", "#"];
   for (var i = 0, length = notAllowed.length; i < length; i ++) {
     parsed = parsed.split(notAllowed[i]).join("");
   }

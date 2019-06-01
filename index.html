@@ -1,5 +1,15 @@
 <html>
   <head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-141251142-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-141251142-1');
+    </script>
+
     <title>Audemos: Share Your Music Ideas</title>
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
@@ -171,10 +181,10 @@
               if (json.key === "size") {return "size";}
               // Construct the key and send the file to s3
               timestamp = "" + json.timestamp;
-              key = timestamp + "_" + key;
+              key = json.key;
               return fetch(json.uploadURL, {
                 method: "PUT",
-                body: new Blob([reader.result], {key: json.key, type: file.type})
+                body: new Blob([reader.result], {key: key, type: file.type})
               });
             })
             .then(function(value) {
