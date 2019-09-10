@@ -14,7 +14,7 @@ module.exports.getURL = (event, context, callback) => {
   }
 
   // Check that the file is not too big
-  if (parameters.size > 1024*1024*100) {
+  if (parameters.size > 1024*1024*250) {
     // If the file type is not supported, return forbidden
     callback(null, {
         statusCode: 400,
