@@ -1,0 +1,188 @@
+body {
+  font-family: 'Calibri', Calibri, sans-serif;
+  background-color: rgb(77, 133, 255);
+  background-image: linear-gradient( rgb(168, 209, 255), rgb(77, 133, 255));
+  background-attachment: fixed;
+}
+
+.hidden {
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s .5s, opacity .5s linear;
+}
+
+.visible {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity .5s linear;
+}
+
+.aligner {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  flex-direction: column;
+}
+
+h1 {
+  font-size: 250%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 10px;
+  color: rgb(66, 66, 66);
+}
+
+p {
+  font-size: 200%;
+  margin: 10px;
+  color: rgb(77, 133, 255);
+}
+
+a {
+  font-size: 120%;
+  color: rgb(77, 133, 255);
+  transition: all .1s ease-in-out !important;
+}
+
+a:hover {
+  color: skyblue;
+}
+
+hr {
+  width: 90%;
+  color: rgb(77, 133, 255);
+}
+
+.section {
+  border: 2px solid rgb(77, 133, 255);
+  border-radius: 10px;
+  box-shadow: 0px 5px 5px black;
+  padding: 10px;
+  margin: 2%;
+  text-align: center;
+  justify-content: center;
+  background-color: white;
+  width: 450px;
+  flex-shrink: 0;
+  transition: all .5s ease-in-out;
+}
+
+#sectionTop {
+  margin-top: auto;
+  position: relative;
+}
+
+.topInit {
+  top: -50%;
+}
+
+#sectionBottom {
+  margin-bottom: auto;
+  position: relative;
+}
+
+.bottomInit {
+  top: -10%;
+}
+
+audio {
+  border-radius: 10px;
+}
+
+.button {
+  margin: 5px 5px 0px 5px;
+  padding: 5px 10px;
+}
+
+#downloadLink {
+  font-size: 300%;
+  margin: 5px;
+}
+
+.cloud {
+  text-align: center;
+  box-sizing: border-box;
+  width: 90%;
+  padding: 2em 1em;
+  color: rgb(77, 133, 255);
+  background-color: white;
+  border-radius: 5px;
+  border: 1px dashed rgb(77, 133, 255);
+  display: inline-block;
+  align-items: center;
+  user-select: none;
+}
+
+#uploadMessage {
+  background: #fff;
+  text-align: center;
+  transition: all 0.2s;
+  margin: 5px;
+  width: 100%;
+  user-select: none;
+}
+
+progressbar {
+  background: rgb(36, 105, 255);
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  color: #fff;
+  width: 20px;
+  height: 10px;
+  margin: 1px;
+  position: relative;
+  display: inline-block;
+  animation-name: upload-animation;
+  animation-duration: 1.25s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+}
+
+.p1 {
+  animation-delay: 0s;
+}
+
+.p2 {
+  animation-delay: 0.1s;
+}
+
+.p3 {
+  animation-delay: 0.2s;
+}
+
+.p4 {
+  animation-delay: 0.3s;
+}
+
+.p5 {
+  animation-delay: 0.4s;
+}
+
+@keyframes upload-animation {
+  0% {
+    background: rgb(36, 105, 255);
+    top: 0px;
+    box-shadow: 0px 0px black, 0px 0px 0px skyblue;
+  }
+  10% {
+    background: skyblue;
+    top: -2px;
+    box-shadow: 0px 2px black, 0px 0px 5px skyblue;
+  }
+  20% {
+    background: rgb(36, 105, 255);
+    top: 0px;
+    box-shadow: 0px 0px black, 0px 0px 0px skyblue;
+  }
+}
+
+.list {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-align: left;
+  margin: 5px;
+  display: inline-block;
+}

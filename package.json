@@ -1,0 +1,16 @@
+{
+  "name": "audemos",
+  "version": "1.0.0",
+  "description": "Music demo sharing service",
+  "main": "handler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://ethan555@bitbucket.org/ethan555/audemos.git"
+  },
+  "author": "Ethan Williams",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/ethan555/audemos#readme"
+}
