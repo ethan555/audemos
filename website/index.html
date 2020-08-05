@@ -1,0 +1,73 @@
+<html>
+
+<head>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-141251142-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'UA-141251142-1');
+  </script>
+
+  <title>Audemos: Share Your Music Ideas</title>
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Font Awesome -->
+  <script src="https://use.fontawesome.com/c525aa9523.js"></script>
+</head>
+
+<body>
+  <div class="aligner">
+    <div id="sectionTop" class="section topInit">
+      <h1 id='audioFile'>No File Loaded</h1>
+      <div id="audioBlock" class="audioPlayer hidden">
+        <audio id="audio" controls controlsList="nodownload">
+          <source id='audioURL' type="audio/mp3" src="">
+          </source>
+          Your browser does not support this audio player.
+        </audio>
+        <a id="downloadLink" href="" download>
+          <i class="fa fa-download"></i>
+        </a>
+      </div>
+    </div>
+
+    <div id="sectionBottom" class="section bottomInit">
+      <form name="audioForm">
+        <input class="button" type="text" name="AccessKey" placeholder="Enter Access Key">
+        <input class="button" type="submit" value="Submit">
+      </form>
+
+      <div class="cloud" id="drop">
+        <p>Drop audio file here</p>
+      </div>
+      <br>
+      <h1 id='progressMessage'>Upload a file</h1>
+      <div id='progressBars' class="hidden">
+        <progressbar class="p1"></progressbar>
+        <progressbar class="p2"></progressbar>
+        <progressbar class="p3"></progressbar>
+        <progressbar class="p4"></progressbar>
+        <progressbar class="p5"></progressbar>
+      </div>
+      <div id="keysSection" class="hidden">
+        <hr>
+        <button class="button" onclick="copyURL()">Copy Latest URL</button>
+        <button class="button" onclick="copyKey()">Copy Latest Key</button>
+        <div id="list" class="list">
+          <h1>Access Keys:</h1>
+        </div>
+      </div>
+    </div>
+    <footer>© 2019–2020 <a class="footerLink" href="https://ethan555.github.io/">Ethan Williams</a></footer>
+  </div>
+  <script type="text/javascript" src="script.js"></script>
+</body>
+
+</html>

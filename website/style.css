@@ -191,3 +191,8 @@ progressbar {
 footer {
   color: rgb(5, 5, 5);
 }
+
+.footerLink {
+  font-size: 100%;
+  color: rgb(5, 5, 5);
+}
