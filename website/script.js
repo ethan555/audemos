@@ -56,8 +56,10 @@ function handleDrop(e) {
         })
         .then(function (json) {
           // Make sure the file was accepted
-          if (json.key === "denied") { return "denied"; }
-          if (json.key === "size") { return "size"; }
+          if ("error" in json) {
+            if (json.error === "size") { return "size"; }
+            else { return "denied"; }
+          }
           // Construct the key and send the file to s3
           timestamp = "" + json.timestamp;
           key = json.key;
@@ -109,7 +111,7 @@ function getAudioFile(key) {
   })
   .then(function (json) {
     // If we found the file, update the audio player
-    if (json.url === "not_found") {
+    if ("error" in json) {
       // The file was not found, say so
       console.log("File not found");
       document.getElementById('audioFile').innerHTML = "Not Found";

@@ -4,14 +4,17 @@ service: audemos
 frameworkVersion: ">=1.1.0"
 
 provider:
-  name: aws
-  runtime: nodejs12.x
-
-  environment:
-    S3_AUDIO_BUCKET: ${self:service}-${self:provider.stage}-demos
-  
   stage: dev
   region: us-east-1
+
+  name: aws
+  runtime: nodejs18.x
+
+  environment:
+    REGION: ${self:provider.region}
+    S3_AUDIO_BUCKET: ${self:service}-${self:provider.stage}-demos
+  
+  memorySize: 256
 
   iamRoleStatements:
     - Effect: "Allow"
@@ -35,6 +38,14 @@ functions:
           path: getFileURL
           method: post
           cors: true
+
+package:
+#  include:
+#    - include-me.js
+#    - include-me-dir/**
+  exclude:
+    - website/**
+    - .gitignore
 
 resources:
   Resources:
